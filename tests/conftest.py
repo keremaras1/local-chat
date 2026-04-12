@@ -5,6 +5,9 @@ app module is imported, so tests don't need a real .env file.
 """
 
 import os
+from pathlib import Path
+
+os.chdir(Path(__file__).resolve().parent.parent)
 
 os.environ.setdefault("APP_SECRET", "test-secret-key-for-pytest-must-be-at-least-32-chars")
 os.environ.setdefault("APP_PASSWORD", "testpassword")
