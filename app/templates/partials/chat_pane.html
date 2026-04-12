@@ -1,0 +1,51 @@
+<div class="chat-pane">
+  <header class="chat-header">
+    <span class="chat-title">{{ active_conversation.title }}</span>
+    {% if models %}
+      {% set conv = active_conversation %}
+      {% include "partials/model_form.html" %}
+    {% else %}
+      <span class="chat-model">{{ active_conversation.model }}</span>
+    {% endif %}
+  </header>
+
+  <div class="message-list" id="message-list">
+    {% for msg in messages %}
+      {% if msg.role == 'user' %}
+        {% include "partials/message_user.html" %}
+      {% else %}
+        {% include "partials/message_assistant.html" %}
+      {% endif %}
+    {% else %}
+      <div class="messages-empty">
+        Send a message to start the conversation.
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="chat-input-area">
+    <form id="message-form"
+          hx-post="/api/conversations/{{ active_conversation.id }}/messages"
+          hx-target="#message-list"
+          hx-swap="beforeend"
+          hx-on::after-request="this.reset(); document.getElementById('message-list').scrollTo(0, 999999)">
+      <textarea
+        name="content"
+        class="message-input"
+        placeholder="Message {{ active_conversation.model }}…"
+        rows="1"
+        required
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();this.form.requestSubmit();}"></textarea>
+      <button type="submit" class="btn-send">Send</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // Scroll to bottom on initial load
+  (function() {
+    var ml = document.getElementById('message-list');
+    if (ml) ml.scrollTop = ml.scrollHeight;
+  })();
+</script>

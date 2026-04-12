@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in — LocalChat{% endblock %}
+
+{% block body %}
+<div class="login-page">
+  <div class="login-card">
+    <h1>LocalChat</h1>
+    <p>Enter your password to access the app.</p>
+
+    {% if error %}
+      <div class="login-error">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="/login">
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password"
+               autofocus autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="btn-login">Sign in</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

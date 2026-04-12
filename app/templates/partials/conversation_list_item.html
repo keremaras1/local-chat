@@ -1,0 +1,16 @@
+<li class="conv-item {% if active_conversation and active_conversation.id == conv.id %}active{% endif %}"
+    id="conv-{{ conv.id }}">
+  <a class="conv-link"
+     hx-get="/c/{{ conv.id }}"
+     hx-target="#chat-area"
+     hx-swap="innerHTML"
+     hx-push-url="/c/{{ conv.id }}">
+    {{ conv.title | truncate(40, true, '…') }}
+  </a>
+  <button class="conv-delete"
+          title="Delete conversation"
+          hx-delete="/api/conversations/{{ conv.id }}"
+          hx-target="#conv-{{ conv.id }}"
+          hx-swap="outerHTML"
+          hx-confirm="Delete this conversation?">✕</button>
+</li>

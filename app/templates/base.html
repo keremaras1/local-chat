@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}LocalChat{% endblock %}</title>
+    <link rel="stylesheet" href="/static/styles.css">
+    <link rel="stylesheet" href="/static/pygments.css">
+    <script src="/static/htmx.min.js"></script>
+    <script src="/static/marked.min.js"></script>
+    <script src="/static/dompurify.min.js"></script>
+</head>
+<body>
+    <div id="toast" class="toast" aria-live="polite"></div>
+    {% block body %}{% endblock %}
+
+    <script>
+    // Simple error toast for HTMX failures.
+    document.body.addEventListener("htmx:responseError", function(evt) {
+        var toast = document.getElementById("toast");
+        toast.textContent = "Request failed (" + evt.detail.xhr.status + "). Is Ollama running?";
+        toast.classList.add("toast-visible");
+        setTimeout(function() { toast.classList.remove("toast-visible"); }, 4000);
+    });
+    </script>
+</body>
+</html>

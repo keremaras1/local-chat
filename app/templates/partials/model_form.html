@@ -1,0 +1,11 @@
+<form id="model-form">
+  <select name="model" class="chat-model-select"
+          hx-patch="/api/conversations/{{ conv.id }}/model"
+          hx-trigger="change"
+          hx-target="#model-form"
+          hx-swap="outerHTML">
+    {% for m in models %}
+      <option value="{{ m }}" {% if m == conv.model %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select>
+</form>

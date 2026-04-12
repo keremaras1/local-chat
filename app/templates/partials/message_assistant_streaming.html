@@ -1,0 +1,44 @@
+<div class="message message-assistant message-streaming" id="msg-{{ msg.id }}">
+  <div class="message-content" id="stream-{{ msg.id }}"></div>
+</div>
+<script>
+(function() {
+  var mid = "{{ msg.id }}";
+  var contentEl = document.getElementById("stream-" + mid);
+  var containerEl = document.getElementById("msg-" + mid);
+  var accumulated = "";
+  var pendingRender = false;
+  var es = new EventSource("/api/conversations/{{ conversation_id }}/messages/" + mid + "/stream");
+
+  es.addEventListener("token", function(e) {
+    accumulated += e.data;
+    if (!pendingRender) {
+      pendingRender = true;
+      requestAnimationFrame(function() {
+        contentEl.innerHTML = DOMPurify.sanitize(marked.parse(accumulated));
+        containerEl.scrollIntoView({block: "end", behavior: "smooth"});
+        pendingRender = false;
+      });
+    }
+  });
+
+  es.addEventListener("done", function(e) {
+    es.close();
+    var tmp = document.createElement("div");
+    tmp.innerHTML = DOMPurify.sanitize(e.data);
+    var replacement = tmp.firstElementChild;
+    if (replacement) {
+      containerEl.replaceWith(replacement);
+    }
+    document.getElementById("message-list").scrollTo(0, 999999);
+  });
+
+  es.onerror = function() {
+    es.close();
+    containerEl.classList.remove("message-streaming");
+    if (!contentEl.textContent.trim()) {
+      contentEl.textContent = "[Error: could not connect to Ollama]";
+    }
+  };
+})();
+</script>

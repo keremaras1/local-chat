@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}LocalChat{% endblock %}
+
+{% block body %}
+<div class="layout">
+
+  {# ── Sidebar ─────────────────────────────────────────────── #}
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-logo">LocalChat</span>
+    </div>
+
+    <div class="sidebar-new">
+      <button class="btn-new-chat"
+              hx-post="/api/conversations"
+              hx-target="#conversation-list"
+              hx-swap="afterbegin"
+              hx-push-url="true">
+        + New chat
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" id="sidebar-nav">
+      <ul class="conversation-list" id="conversation-list">
+        {% for conv in conversations %}
+          {% include "partials/conversation_list_item.html" %}
+        {% else %}
+          <li class="conv-empty">No conversations yet.</li>
+        {% endfor %}
+      </ul>
+    </nav>
+
+    <div class="sidebar-footer">
+      <form action="/logout" method="post">
+        <button type="submit" class="btn-logout">Sign out</button>
+      </form>
+    </div>
+  </aside>
+
+  {# ── Main chat area ───────────────────────────────────────── #}
+  <main class="chat-main" id="chat-area">
+    {% if active_conversation %}
+      {% include "partials/chat_pane.html" %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-inner">
+          <h2>LocalChat</h2>
+          <p>Select a conversation or start a new one.</p>
+          <button class="btn-new-chat-primary"
+                  hx-post="/api/conversations"
+                  hx-target="#conversation-list"
+                  hx-swap="afterbegin"
+                  hx-push-url="true">
+            New chat
+          </button>
+        </div>
+      </div>
+    {% endif %}
+  </main>
+
+</div>
+{% endblock %}
