@@ -1,0 +1,10 @@
+services:
+  db:
+    ports:
+      - "127.0.0.1:5432:5432"
+  app:
+    network_mode: host
+    ports: []
+    extra_hosts: []
+    environment:
+      DATABASE_URL: postgresql+asyncpg://localchat:${DB_PASSWORD:?DB_PASSWORD must be set in .env}@127.0.0.1:5432/localchat
