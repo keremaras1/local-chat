@@ -1,4 +1,5 @@
 import asyncio
+import time
 from collections import defaultdict
 
 from fastapi import Header, HTTPException
@@ -13,12 +14,13 @@ SESSION_KEY = "authenticated"
 # Paths that bypass the auth check.
 _PUBLIC_PREFIXES = ("/login", "/health", "/static")
 
-# Simple in-process brute-force counter: ip → consecutive failure count.
-# Resets on successful login or app restart. Acceptable for a single-process LAN app.
-_fail_counts: dict[str, int] = defaultdict(int)
+# Simple in-process brute-force counter: ip → (failure_count, last_failure_ts).
+# Entries older than _TTL_S are evicted on access to bound memory usage.
+_fail_counts: dict[str, tuple[int, float]] = defaultdict(lambda: (0, 0.0))
 _MAX_FAILURES = 10
 _LOCKOUT_DELAY_S = 2.0
 _FAILURE_DELAY_S = 0.3
+_TTL_S = 3600  # evict stale entries after 1 hour
 
 
 class AuthMiddleware(BaseHTTPMiddleware):
@@ -33,12 +35,21 @@ class AuthMiddleware(BaseHTTPMiddleware):
 async def check_login(request: Request, password: str) -> bool:
     """Verify password with brute-force protection. Returns True on success."""
     ip = request.client.host if request.client else "unknown"
-    if _fail_counts[ip] >= _MAX_FAILURES:
+    failures, last_ts = _fail_counts[ip]
+
+    # Evict stale entry — resets counter for IPs that haven't tried recently.
+    if time.monotonic() - last_ts > _TTL_S:
+        failures = 0
+
+    if failures >= _MAX_FAILURES:
         await asyncio.sleep(_LOCKOUT_DELAY_S)
+        return False
+
     if password == settings.app_password:
-        _fail_counts[ip] = 0
+        _fail_counts[ip] = (0, 0.0)
         return True
-    _fail_counts[ip] += 1
+
+    _fail_counts[ip] = (failures + 1, time.monotonic())
     await asyncio.sleep(_FAILURE_DELAY_S)
     return False
 

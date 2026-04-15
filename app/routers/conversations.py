@@ -29,7 +29,7 @@ async def create_conversation(
     conv = Conversation(
         id=uuid.uuid4(),
         title=DEFAULT_CONVERSATION_TITLE,
-        model=models[0] if models else "unknown",
+        model=models[0] if models else "",
     )
     db.add(conv)
     await db.commit()

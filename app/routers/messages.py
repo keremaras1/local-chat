@@ -12,6 +12,7 @@ GET /api/conversations/{id}/messages/{mid}/stream
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime, timezone
+from types import SimpleNamespace
 
 from fastapi import APIRouter, Depends, Form, Request
 from fastapi.responses import HTMLResponse
@@ -134,7 +135,6 @@ async def stream_message(
             await db.commit()
 
         # Render from in-memory data — the template only uses msg.id and msg.content.
-        from types import SimpleNamespace
         msg_data = SimpleNamespace(id=message_id, content=full_content)
         rendered = templates.get_template("partials/message_assistant.html").render(
             msg=msg_data

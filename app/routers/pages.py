@@ -40,8 +40,11 @@ async def conversation_page(
     conversation_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
 ):
+    is_htmx = bool(request.headers.get("HX-Request"))
     models_task = asyncio.create_task(safe_list_models())
-    conversations = await get_conversations(db)
+
+    # Skip sidebar query on HTMX partial requests — conversations list is not used.
+    conversations = [] if is_htmx else await get_conversations(db)
     conv = await get_conversation_by_id(db, conversation_id)
     models = await models_task
 
@@ -61,7 +64,7 @@ async def conversation_page(
         "models": models,
     }
 
-    if request.headers.get("HX-Request"):
+    if is_htmx:
         return templates.TemplateResponse(request, "partials/chat_pane.html", ctx)
 
     return templates.TemplateResponse(
