@@ -38,7 +38,9 @@ async def check_login(request: Request, password: str) -> bool:
     failures, last_ts = _fail_counts[ip]
 
     # Evict stale entry — resets counter for IPs that haven't tried recently.
-    if time.monotonic() - last_ts > _TTL_S:
+    # last_ts == 0.0 means no prior failures; skip to avoid comparing against the
+    # epoch (time.monotonic() - 0.0 always exceeds _TTL_S).
+    if last_ts != 0.0 and time.monotonic() - last_ts > _TTL_S:
         failures = 0
 
     if failures >= _MAX_FAILURES:
