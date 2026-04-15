@@ -9,12 +9,15 @@ RUN apt-get update \
 
 # Install Python deps first (separate layer — changes less often than app code)
 COPY pyproject.toml .
-RUN pip install --no-cache-dir ".[dev]"
+RUN pip install --no-cache-dir .
 
 # Copy application code
 COPY alembic.ini .
 COPY alembic/ ./alembic/
 COPY app/ ./app/
 COPY static/ ./static/
+
+RUN adduser --disabled-password --gecos "" appuser
+USER appuser
 
 EXPOSE 8000
