@@ -19,7 +19,7 @@ dependencies = [
     "linkify-it-py>=2.0",
     "mdit-py-plugins>=0.4",
     "pygments>=2.18",
-    "python-multipart>=0.0.9",
+    "python-multipart>=0.0.18",
     "itsdangerous>=2.2",
     "jinja2>=3.1",
 ]
